@@ -1,17 +1,31 @@
 <?php
 
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 
-echo flipText("testtest");
 
-function flipText($text) {
-    $flippedText = "";
-    for ($index = strlen($text)-1; $index  >= 0; $index--) {
-        $flippedText = $flippedText.$text[$index];
+
+
+
+
+include_once '../intergration/DbHandler.php';
+class Palindroom{
+    private $text;
+    private $flippedText;
+
+    function flipText($text){
+        $flippedText = "";
+        $this->text = $text;
+        for ($index = strlen($text)-1; $index >= 0 ; $index--){
+            $flippedText = $flippedText.$text[$index];
+        }
+        $this->flippedText = $flippedText;
     }
-    return $flippedText;
+
+    function getFlippedText(){
+        return $this->flippedText;
+    }
+    
+    function heeftFlippedtextEenBetekenis(){
+        $db= new DbHandler();
+        return $db->findWord($this->flippedText);
+    }
 }

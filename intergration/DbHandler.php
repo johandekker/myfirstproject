@@ -9,60 +9,72 @@
 /**
  * Description of DbHandler
  *
- * @author johan
- * 
+ * @author Demit
  */
-$db = new DbHandler();
-if ($db ->findWoord("lepel") == TRUE){
-    $db->printWoord();
-}
-else {
-    echo "geen kaas vandaag";
-}
-//een functiwe heet ook wel een method
 
+//$db = new DbHandler();
+//if ($db->findWord("lepel") == TRUE){
+//    $db->printWord();
+//}
+//else {
+//    echo "niets gevonden";
+//}
+
+include_once '_config.php';
 class DbHandler {
-    //dit noemen we ook wel een attribute
+    //dit noemen we in OO een attribute
     private $woord;
     
-    function findWoord($woord){
+    //een functie in OO heet een method
+    function findWord($woord){
         $result = FALSE;
-        $this->woord =$woord;
+        $this->woord = $woord;
         
+        //stap 1: instellen PDO
+        $options = $this->setPDOoptions();
+        
+        $sql = "SELECT * FROM palindromen WHERE woord ='". $woord ."';";
+        
+        try {
+            
+            //stap2:
+            $conn = $this->connectToDatabase($options);
+            //stap 3: run the query
+            $stmt = $conn->query($sql);
+            
+            //stap 4: fetch
+            if ($stmt->rowCount() == 1){
+                $result = TRUE;
+            }     
+        }
+        catch (PDOException $e){
+            echo "jouw tekst" . $e->getMessage()."(".$e->getCode().").";
+        }
+        return $result;
+    }
+    
+    private function setPDOoptions(){
         $options = [
-           PDO::ATTR_ERRMODE                =>PDO::ERRMODE_EXCEPTION,
-           PDO::ATTR_DEFAULT_FETCH_MODE     =>PDO::FETCH_ASSOC,
-           PDO::ATTR_EMULATE_PREPARES       =>false,
-        ]  ; 
+            PDO::ATTR_ERRMODE               => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE    => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES      => false,
+        ];
+        return $options;
+    }
+    
+    private function connectToDatabase($options){
+        $host = 'localhost';
+        $charset = 'utf8mb4';
+        $db = 'palindroom';
         
-        $host = "localhost"; 
-     $charset= 'utf8mb4';
-     $db = "palindroom";
-     $user = "root";
-     $password = "";
-     $host = "mysql:host=$host;dbname=$db;charset=$charset";
-
-     $sql = "Select * FROM palindromen WHERE woord = '".$woord."';";
-     
-     try{
-         $conn = new PDO($host, $user, $password, $options);
-         $stmt = $conn->query($sql);
-         if  ($stmt->rowCount() == 1){
-             $result = TRUE;
-         }
-     }
-                 
-     catch(PDOException $e){
-         echo "jou text" . $e->getMessage()."(".$e->getCode().").";
-     }
-     return $result;
-       
-   }
-             
-    Function printWoord(){
+        $host = "mysql:host=$host; dbname=$db; charset=$charset";
+        
+        $conn = new PDO($host, USER, PASSWORD, $options);
+        
+        return $conn;
+    }
+    
+    function printWord(){
         echo $this->woord;
     }
-   
-   }
-//put your code here
-
+}
